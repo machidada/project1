@@ -13,7 +13,7 @@ h = linspace(0, 5, 50);  % 透鏡高度，取樣點為50
 left = nan(size(h));    % 左曲面 (由空氣射入)
 right = nan(size(h));   % 右曲面 (由透鏡射出)
 
-%%   Monte-Carlo 設計透鏡表面
+%%  設計透鏡表面
 %根據Snell's law 反推透鏡入射與出射曲面
 
 % 計算左側透鏡表面(光線從空氣進入透鏡)
@@ -28,7 +28,8 @@ for i = 1:length(h)        % 針對每一條高度為h(i)的光線
     N = 10000;  
     alpha_samples = pi * (rand(1, N) - 0.5); 
 
-    % 對每個 alpha 代入 Snell's Law，計算是否滿足折射條件
+    % 將每個候選的法線角度 alpha 代入 Snell's Law
+    % 計算入射角與折射角是否滿足折射條件
     snell_vals = n1 * sin(theta_in - alpha_samples) - n2 * sin(-alpha_samples);
 
     % 找出誤差最小的 alpha，即最接近滿足 Snell's Law 的法線方向
@@ -65,7 +66,8 @@ for i = 1:length(h)
     theta_out = atan2(y2 - y, x2 - right(i));
 
     N = 10000;
-    alpha_samples = (-pi/2) + pi * (0:N-1)/N;   % 改用等距分佈
+    % 改用等距角度掃描取代隨機取樣，提升計算穩定性
+    alpha_samples = (-pi/2) + pi * (0:N-1)/N;  
     snell_vals = n2 * sin(-alpha_samples) - n1 * sin(theta_out - alpha_samples);
     [~, idx] = min(abs(snell_vals));
     alpha = alpha_samples(idx);
@@ -100,7 +102,7 @@ plot(right, -h, 'k', 'LineWidth', 2, 'HandleVisibility','off');
 plot(x1, y1, 'go', 'MarkerSize', 10, 'DisplayName', '點光源');
 plot(x2, y2, 'bo', 'MarkerSize', 10, 'DisplayName', '聚焦點');
 
-% 畫出光線（上半部）
+% 繪製上半部光線（正 y）通過透鏡的路徑
 first = true; % 讓第一條加入圖例
 for i = 1:5:length(h)
     y = h(i);
@@ -120,7 +122,7 @@ for i = 1:5:length(h)
     end
 end
 
-% 畫出光線（下半部）
+% 繪製下半部光線（負 y）通過透鏡的路徑
 for i = 1:5:length(h)
     y = -h(i);
     x_lens_L = left(i);
