@@ -21,8 +21,20 @@ right = nan(size(h));   % 右曲面 (由透鏡射出)
 for i = 1:length(h)        % 針對每一條高度為h(i)的光線
     y = h(i); 
 
-    % 計算光源點到暫定折射點(x=0,y) 的入射角 θ_in
-    theta_in = atan2(y - y1, 0 - x1); 
+    if i == 1
+        left(i) = 0; % 初始點
+    else
+        dy = h(i) - h(i-1);
+        x_prev = left(i-1);
+        y_prev = h(i-1);
+
+        % 用前一折射點推算新折射點在直線上的 x 位置
+        theta_in_prev = atan2(y_prev - y1, x_prev - x1);
+        left(i) = x1 + (y - y1) / tan(theta_in_prev);
+    end
+
+    % 光源到新折射點的入射角
+    theta_in = atan2(y - y1, left(i) - x1);
 
     % 利用Monte-Carlo隨機產生 N 個可能的法線角度 alpha (與 y 軸夾角)
     N = 10000;  
